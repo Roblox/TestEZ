@@ -5,6 +5,9 @@
 	TestPlan objects are produced by TestPlanner.
 ]]
 
+local RunService = game:GetService("RunService")
+local IS_NOT_RUNNING = not RunService:IsRunning()
+
 local TestEnum = require(script.Parent.TestEnum)
 local Expectation = require(script.Parent.Expectation)
 
@@ -104,6 +107,12 @@ local function newEnvironment(currentNode, extraEnvironment)
 	env.xit = env.itSKIP
 	env.fdescribe = env.describeFOCUS
 	env.xdescribe = env.describeSKIP
+
+	-- Most prominent when using run-in-roblox, while running tests without entering run mode,
+	-- time(), will always equal zero due to the server not running.
+	if IS_NOT_RUNNING then
+		env.time = os.clock
+	end
 
 	env.expect = setmetatable({
 		extend = function(...)
