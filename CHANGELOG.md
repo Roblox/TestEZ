@@ -1,6 +1,7 @@
 # TestEZ Changelog
 
 ## Unreleased Changes
+* Add a deprecation notice for uses of extraEnvironment.
 
 ## 0.4.1 (2020-10-30)
 * `afterEach` blocks now run their code after `it` blocks fail or error

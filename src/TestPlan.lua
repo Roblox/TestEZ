@@ -215,6 +215,14 @@ TestPlan.__index = TestPlan
 	Create a new, empty TestPlan.
 ]]
 function TestPlan.new(testNamePattern, extraEnvironment)
+	if extraEnvironment and next(extraEnvironment) then
+		warn(
+			"extraEnvironment is deprecated and will be removed in the near future. " ..
+			"Please use an init.spec.lua file and the test context to pass in anything " ..
+			"that is currently in extraEnvironment."
+		)
+	end
+
 	local plan = {
 		children = {},
 		testNamePattern = testNamePattern,
