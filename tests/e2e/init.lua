@@ -69,4 +69,58 @@ return {
 			testNamePattern = "specificFileName",
 		})
 	end,
+
+	["suiteAndCaseHooks (onEnterSuite, onEnterCase, onLeaveCase, onLeaveSuite)"] = function()
+		local events = {}
+		local function eventAppender(eventType)
+			return function(...)
+				table.insert(events, {eventType, ...})
+			end
+		end
+
+		TestEZ.TestBootstrap:run({
+			script:FindFirstChild("suiteAndCaseHooks"),
+		},
+		noOptReporter,
+		{
+			onEnterSuite = eventAppender("onEnterSuite"),
+			onLeaveSuite = eventAppender("onLeaveSuite"),
+			onEnterCase = eventAppender("onEnterCase"),
+			onLeaveCase = eventAppender("onLeaveCase")
+		})
+
+		assert(#events == 10)
+
+		assert(events[1][1] == "onEnterSuite")
+		assert(events[1][2] == "suiteAndCaseHooks")
+
+		assert(events[2][1] == "onEnterSuite")
+		assert(events[2][2] == "My suite")
+
+		assert(events[3][1] == "onEnterCase")
+		assert(events[3][2] == "My nested case")
+
+		assert(events[4][1] == "onLeaveCase")
+		assert(events[4][2] == "My nested case")
+
+		assert(events[5][1] == "onLeaveSuite")
+		assert(events[5][2] == "My suite")
+
+		assert(events[6][1] == "onEnterCase")
+		assert(events[6][2] == "My case")
+
+		assert(events[7][1] == "onLeaveCase")
+		assert(events[7][2] == "My case")
+
+		assert(events[8][1] == "onEnterCase")
+		assert(events[8][2] == "My failing case")
+
+		assert(events[9][1] == "onLeaveCase")
+		assert(events[9][2] == "My failing case")
+		-- The error from the failing case
+		assert(type(events[9][3]) == "string")
+
+		assert(events[10][1] == "onLeaveSuite")
+		assert(events[10][2] == "suiteAndCaseHooks")
+	end,
 }

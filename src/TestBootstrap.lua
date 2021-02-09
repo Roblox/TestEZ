@@ -124,7 +124,7 @@ function TestBootstrap:run(roots, reporter, otherOptions)
 	local plan = TestPlanner.createPlan(modules, testNamePattern, extraEnvironment)
 	local afterPlan = tick()
 
-	local results = TestRunner.runPlan(plan)
+	local results = TestRunner.runPlan(plan, otherOptions)
 	local afterRun = tick()
 
 	reporter.report(results)

@@ -32,7 +32,7 @@ end
 	Runs the given TestPlan and returns a TestResults object representing the
 	results of the run.
 ]]
-function TestRunner.runPlan(plan)
+function TestRunner.runPlan(plan, options)
 	local session = TestSession.new(plan)
 	local lifecycleHooks = LifecycleHooks.new()
 
@@ -42,7 +42,7 @@ function TestRunner.runPlan(plan)
 
 	session.hasFocusNodes = #exclusiveNodes > 0
 
-	TestRunner.runPlanNode(session, plan, lifecycleHooks)
+	TestRunner.runPlanNode(session, plan, lifecycleHooks, options)
 
 	return session:finalize()
 end
@@ -51,7 +51,8 @@ end
 	Run the given test plan node and its descendants, using the given test
 	session to store all of the results.
 ]]
-function TestRunner.runPlanNode(session, planNode, lifecycleHooks)
+function TestRunner.runPlanNode(session, planNode, lifecycleHooks, options)
+	options = options or {}
 	local function runCallback(callback, messagePrefix)
 		local success = true
 		local errorMessage
@@ -113,7 +114,13 @@ function TestRunner.runPlanNode(session, planNode, lifecycleHooks)
 			end
 		end
 
+		if options.onEnterCase then
+			options.onEnterCase(childPlanNode.phrase)
+		end
 		local testSuccess, testErrorMessage = runCallback(childPlanNode.callback)
+		if options.onLeaveCase then
+			options.onLeaveCase(childPlanNode.phrase, not testSuccess and testErrorMessage or nil)
+		end
 
 		for _, hook in ipairs(lifecycleHooks:getAfterEachHooks()) do
 			local success, errorMessage = runCallback(hook, "afterEach hook: ")
@@ -161,7 +168,13 @@ function TestRunner.runPlanNode(session, planNode, lifecycleHooks)
 				session:popNode()
 			elseif childPlanNode.type == TestEnum.NodeType.Describe then
 				session:pushNode(childPlanNode)
-				TestRunner.runPlanNode(session, childPlanNode, lifecycleHooks)
+				if options.onEnterSuite then
+					options.onEnterSuite(childPlanNode.phrase)
+				end
+				TestRunner.runPlanNode(session, childPlanNode, lifecycleHooks, options)
+				if options.onLeaveSuite then
+					options.onLeaveSuite(childPlanNode.phrase)
+				end
 
 				-- Did we have an error trying build a test plan?
 				if childPlanNode.loadError then
