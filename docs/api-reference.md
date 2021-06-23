@@ -264,8 +264,8 @@ This function works similarly to `FOCUS()`, except instead of marking a block as
 
 ### describeFOCUS and describeSKIP
 ```
-describeFOCUS(phrase: string)
-describeSKIP(phrase: string)
+describeFOCUS(phrase: string, callback(context: table))
+describeSKIP(phrase: string, callback(context: table))
 ```
 
 These methods are special versions of `describe` that automatically mark the `describe` block as *focused* or *skipped*.
