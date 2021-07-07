@@ -54,7 +54,7 @@ function TestBootstrap:getModulesImpl(root, modules, current)
 	current = current or root
 
 	if isSpecScript(current) then
-		local method = require(current)
+		local method = debug.loadmodule(current)
 		local path = getPath(current, root)
 		local pathString = toStringPath(path)
 

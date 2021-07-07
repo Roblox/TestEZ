@@ -34,6 +34,7 @@ function TestPlanner.createPlan(modulesList, testNamePattern, extraEnvironment)
 		plan:addRoot(module.path, module.method)
 	end
 
+	plan:finalize()
 	return plan
 end
 

@@ -1,6 +1,12 @@
 # TestEZ Changelog
 
 ## Unreleased Changes
+* Remove the lifecycle hooks from the session tree. This prevents the `[?]` spam from the reporter not recognizing these nodes.
+* Change the way errors are collected to call tostring on them before further processing.
+  * Luau allows non-string errors, but not concatenating non-strings or passing non-strings to `debug.traceback` as a message, so TestRunner needs to do that step. This is a temporary fix as the better solution would be to retain the error in object form for as long as possible to give the reporter more to work with.
+  * This also makes a slight change to what's in the traceback to eliminate the unnecessary line mentioning the error collection function.
+* Add a deprecation notice for uses of extraEnvironment.
+* Guarantee that `init.spec.lua` will run before any `it` or `describe` blocks in the folder under it.
 
 ## 0.4.1 (2020-10-30)
 * `afterEach` blocks now run their code after `it` blocks fail or error
