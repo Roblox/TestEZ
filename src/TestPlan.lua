@@ -25,9 +25,6 @@ local function newEnvironment(currentNode, extraEnvironment)
 	local function addChild(phrase, callback, nodeType, nodeModifier)
 		local node = currentNode:addChild(phrase, nodeType, nodeModifier)
 		node.callback = callback
-		if nodeType == TestEnum.NodeType.Describe then
-			node:expand()
-		end
 		return node
 	end
 
@@ -185,10 +182,14 @@ function TestNode:getFullName()
 end
 
 --[[
-	Expand a node by setting its callback environment and then calling it. Any
-	further it and describe calls within the callback will be added to the tree.
+	Expand a node by setting its callback environment and then calling it. Only
+	expands this one node.
 ]]
 function TestNode:expand()
+	if not self.callback then
+		return
+	end
+
 	local originalEnv = getfenv(self.callback)
 	local callbackEnv = setmetatable({}, { __index = originalEnv })
 	for key, value in pairs(self.environment) do
@@ -258,7 +259,17 @@ function TestPlan:addRoot(path, method)
 	end
 
 	curNode.callback = method
-	curNode:expand()
+end
+
+--[[
+	Expands all describe nodes, leaving the plan in a runnable state.
+]]
+function TestPlan:finalize()
+	self:visitAllNodes(function(node)
+		if node.type == TestEnum.NodeType.Describe then
+			node:expand()
+		end
+	end)
 end
 
 --[[
